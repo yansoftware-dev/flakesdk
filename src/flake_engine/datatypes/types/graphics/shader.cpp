@@ -28,6 +28,7 @@ void Shader::load() {
     vertex_shader = glCreateShader(GL_VERTEX_SHADER);
     glShaderSource(vertex_shader, 1, &vert_shader_data, NULL);
     glCompileShader(vertex_shader); //Compiling shader
+    //std::cout << glGetError() << std::endl;
     //Checking for compile errors.
     glGetShaderiv(vertex_shader, GL_COMPILE_STATUS, &success);
     if (!success) {
@@ -37,9 +38,10 @@ void Shader::load() {
         os.print(infoLog);
     }
 
-    fragment_shader = glCreateShader(GL_VERTEX_SHADER);
+    fragment_shader = glCreateShader(GL_FRAGMENT_SHADER);
     glShaderSource(fragment_shader, 1, &frag_shader_data, NULL);
     glCompileShader(fragment_shader); //Compiling shader
+    //std::cout << glGetError() << std::endl;
 
     //Checking for compile errors.
     glGetShaderiv(fragment_shader, GL_COMPILE_STATUS, &success);
@@ -55,8 +57,9 @@ void Shader::load() {
     glAttachShader(ID, vertex_shader);
     glAttachShader(ID, fragment_shader);
     glLinkProgram(ID);
+    //std::cout << glGetError() << std::endl;;
 
-    glGetShaderiv(ID, GL_LINK_STATUS, &success);
+    glGetProgramiv(ID, GL_LINK_STATUS, &success);
     if (!success) {
         glGetShaderInfoLog(ID, 512, NULL, infoLog);
         std::string err = "Failed to link shaders! --Info-log >> ";
@@ -69,4 +72,5 @@ void Shader::load() {
 }
 void Shader::use() {
     glUseProgram(ID);
+    //std::cout << glGetError() << std::endl;
 }

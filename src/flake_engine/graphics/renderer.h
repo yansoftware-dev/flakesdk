@@ -17,12 +17,19 @@ namespace Flake {
         void setRenderMode(RenderMode mode);
         void render();
         void clear();
-        void setCamera(Datatypes::Camera& camera);
         void addToQueue(Datatypes::MeshObject object);
+        void setCameraProjection(glm::mat4& projection);
+        void setCameraTransform(glm::mat4& transform);
     private:
         std::vector<Datatypes::MeshObject> m_render_queue;
         GLuint VAO, VBO, EBO;
-        Datatypes::Camera m_camera;
-        uint32_t m_used_vert_count, m_used_inds_count;
+        
+        std::vector<Datatypes::Vertex> v_data;
+        std::vector<uint32_t> e_data;
+
+        Datatypes::Shader m_default_shader;
+
+        glm::mat4 m_camera_projection{0};
+        glm::mat4 m_camera_transform{0};
     };
 }

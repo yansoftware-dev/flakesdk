@@ -1,6 +1,8 @@
 #include "renderer.h"
 
 #include <iostream>
+#include <algorithm>
+#include <type_traits>
 
 using namespace Flake;
 
@@ -17,19 +19,27 @@ void RenderServer::initialize()
     // Binding and setting up data for buffers.
     glBindVertexArray(VAO);
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, 10000, 0, GL_STREAM_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, 10000, 0, GL_DYNAMIC_DRAW);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, 10000, 0, GL_STREAM_DRAW);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, 10000, 0, GL_DYNAMIC_DRAW);
 
     // Inform OpenGL on how the data is made.
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Datatypes::Vertex), (void*)offsetof(Datatypes::Vertex, position));
     glEnableVertexAttribArray(1);
     glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Datatypes::Vertex), (void*)offsetof(Datatypes::Vertex, color_rgb));
+    glEnableVertexAttribArray(2);
+    glVertexAttribPointer(2, 1, GL_UNSIGNED_INT, GL_FALSE, sizeof(Datatypes::Vertex), (void*)offsetof(Datatypes::Vertex, model_id));
 
-    // count of inds anmd verts
-    m_used_inds_count = 0;
-    m_used_vert_count = 0;
+    Flake::File default_vert_shader;
+    Flake::File default_frag_shader;
+    default_vert_shader.path = std::string("src/flake_engine/graphics/shaders/default_vertex_shader.glsl");
+    default_frag_shader.path = std::string("src/flake_engine/graphics/shaders/default_fragment_shader.glsl");
+
+    m_default_shader.vertex_shader_file = default_vert_shader;
+    m_default_shader.fragment_shader_file = default_frag_shader;
+
+    m_default_shader.load();
 
     // ...
 }
@@ -46,55 +56,56 @@ void RenderServer::setRenderMode(RenderMode mode)
     }
 }
 
+void RenderServer::setCameraProjection(glm::mat4& projection) { m_camera_projection = projection; }
+
+void RenderServer::setCameraTransform(glm::mat4& transform) {m_camera_transform = transform; }
+
 void RenderServer::addToQueue(Datatypes::MeshObject object) { m_render_queue.push_back(object); }
 
 void RenderServer::clear() { glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); }
 
-void RenderServer::setCamera(Datatypes::Camera& camera) { m_camera = camera; }
-
 void RenderServer::render()
-{   
-    clear();
+{      
+    clear();  
+
+    v_data.clear();
+    e_data.clear();
 
     if (m_render_queue.empty()) { return; }
 
-    for (auto& object : m_render_queue)
-    {   
-        if (!object.rendered) { 
-            auto& mesh = object.mesh;
+    glm::mat4 model, view, projection;
 
-            object.material.shader.load();
-            object.material.shader.use();
+    uint32_t total_prev_vert_count = 0;
+    for (auto& object : m_render_queue) {
+        for (Datatypes::Vertex v : object.mesh.vertices) { v_data.push_back(v); }
 
-            // 1. Calculate offsets
-            size_t vOffset = m_used_vert_count * sizeof(Datatypes::Vertex);
-            size_t iOffset = m_used_inds_count * sizeof(uint32_t);
-
-            // 2. Upload Vertices
-            glBindBuffer(GL_ARRAY_BUFFER, VBO);
-            glBufferSubData(GL_ARRAY_BUFFER, vOffset, mesh.vertices.size() * sizeof(Datatypes::Vertex), mesh.vertices.data());
-
-            // 3. Offset Indices and Upload
-            // We must create a temporary shifted copy of the indices
-            std::vector<uint32_t> shiftedIndices = mesh.indices;
-            for (auto& index : shiftedIndices) {
-                index += m_used_vert_count;
-            }
-
-            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-            glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, iOffset, shiftedIndices.size() * sizeof(uint32_t), shiftedIndices.data());
-
-            // 4. Update persistent counts
-            m_used_vert_count += (uint32_t)mesh.vertices.size();
-            m_used_inds_count += (uint32_t)mesh.indices.size();
-            
-            object.rendered = true;
+        for (uint32_t e : object.mesh.indices) { 
+            uint32_t edited_e = e + total_prev_vert_count;
+            e_data.push_back(edited_e);
         }
+
+        model = object.getTransform();
+
+        total_prev_vert_count += object.mesh.vertices.size();
     }
-    m_camera.handleMovement();
+
+    m_default_shader.use();
+
+    view = glm::inverse(m_camera_transform);
+    projection = m_camera_projection;
+
+    int modelLoc = glGetUniformLocation(m_default_shader.ID, "model");
+    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+    int viewLoc = glGetUniformLocation(m_default_shader.ID, "view");
+    glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
+    int projectionLoc = glGetUniformLocation(m_default_shader.ID, "projection");
+    glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, glm::value_ptr(projection));
+
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    glBufferData(GL_ARRAY_BUFFER, v_data.size() * sizeof(Datatypes::Vertex), (void*)v_data.data(), GL_DYNAMIC_DRAW);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, e_data.size() * sizeof(uint32_t), (void*)e_data.data(), GL_DYNAMIC_DRAW);
 
     glBindVertexArray(VAO);
-    //glDrawArrays(GL_TRIANGLES, 0, 100);
-    glDrawElements(GL_TRIANGLES, m_used_inds_count, GL_UNSIGNED_INT, NULL);
-    
+    glDrawElements(GL_TRIANGLES, e_data.size(), GL_UNSIGNED_INT, NULL);
 }

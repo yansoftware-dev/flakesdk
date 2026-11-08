@@ -1,5 +1,7 @@
 #include "flake_engine/flake_engine.h"
 
+#include <any>
+
 Flake::WindowServer windowServer;
 Flake::RenderServer renderServer;
 Flake::UIServer uiServer;
@@ -45,55 +47,46 @@ int main(void)
     //Create a mesh with a material
     Datatypes::MeshObject mesh;
     Datatypes::MeshObject mesh2;
-    Datatypes::Material material1;
-    Datatypes::Material material2;
-    Datatypes::Shader shader;
-    Datatypes::Shader shader2;
-    Datatypes::Camera camera;
+    Datatypes::MeshObject mesh3;
+    Datatypes::Material material;
+    Datatypes::FreeCamera camera;
 
-    //Setup shaders
-    Flake::File vert_shader;
-    Flake::File frag_shader;
-    vert_shader.path = std::string("src\\flake_engine\\graphics\\shaders\\default_vertex_shader.glsl");
-    frag_shader.path = std::string("src\\flake_engine\\graphics\\shaders\\default_fragment_shader.glsl");
 
-    shader.vertex_shader_file = vert_shader;
-    shader.fragment_shader_file = frag_shader;
-    shader2.vertex_shader_file = vert_shader;
-    shader2.fragment_shader_file = frag_shader;
 
     //Setup material
-    material1.shader = shader;
-    material2.shader = shader2;
-    mesh.material = material1;
-    mesh2.material = material2;
+    mesh.material = material;
+    mesh2.material = material;
+    mesh3.material = material;
 
     //Setup mesh
     mesh2.mesh.makeTriangle();
     mesh.mesh.makeQuad();
-    //mesh2.mesh.makeTriangle();
-    
+    mesh3.mesh.makeTriangle();
     //Add mesh to render queue
     
     renderServer.addToQueue(mesh2);
     renderServer.addToQueue(mesh);
-    renderServer.setCamera(camera);
+    renderServer.addToQueue(mesh3);
 
     //Sliders
-    //float x = 0.0f;
+    float x = 0.0f;
     bool wir = 0;
 
     while (!windowServer.shouldWindowClose(mainWindow)) {
-        //mesh.setPosition(x, 0.0f, 0.0f);
+        mesh2.setPosition(mesh2.position.x + 0.001f, 0.0f, 0.0f);
 
         inputServer.processInput(mainWindow.glfw_window);
 
+        camera.update();
+
+        renderServer.setCameraProjection(camera.getProjection());
+        renderServer.setCameraTransform(camera.getViewMatrix());
         renderServer.render();
 
         uiServer.ui_begin();
 
         ImGui::Begin("Settings");
-        //ImGui::SliderFloat("xpos", &x, -10.0f, 10.0f);
+        //ImGui::SliderFloat("xpos", &mesh2.position.x, -10.0f, 10.0f);
         ImGui::Checkbox("Wireframe", &wir);
         ImGui::End();
 
