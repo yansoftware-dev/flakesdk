@@ -18,8 +18,8 @@ namespace Flake {
         void render();
         void clear();
         void addToQueue(Datatypes::MeshObject object);
-        void setCameraProjection(glm::mat4& projection);
-        void setCameraTransform(glm::mat4& transform);
+        void setCameraProjection(glm::mat4 projection);
+        void setCameraTransform(glm::mat4 transform);
     private:
         std::vector<Datatypes::MeshObject> m_render_queue;
         GLuint VAO, VBO, EBO;

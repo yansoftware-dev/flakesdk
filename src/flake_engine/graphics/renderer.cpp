@@ -56,9 +56,9 @@ void RenderServer::setRenderMode(RenderMode mode)
     }
 }
 
-void RenderServer::setCameraProjection(glm::mat4& projection) { m_camera_projection = projection; }
+void RenderServer::setCameraProjection(glm::mat4 projection) { m_camera_projection = projection; }
 
-void RenderServer::setCameraTransform(glm::mat4& transform) {m_camera_transform = transform; }
+void RenderServer::setCameraTransform(glm::mat4 transform) {m_camera_transform = transform; }
 
 void RenderServer::addToQueue(Datatypes::MeshObject object) { m_render_queue.push_back(object); }
 
@@ -86,12 +86,12 @@ void RenderServer::render()
 
         model = object.getTransform();
 
-        total_prev_vert_count += object.mesh.vertices.size();
+        total_prev_vert_count += (uint32_t)object.mesh.vertices.size();
     }
 
     m_default_shader.use();
 
-    view = glm::inverse(m_camera_transform);
+    view = m_camera_transform;
     projection = m_camera_projection;
 
     int modelLoc = glGetUniformLocation(m_default_shader.ID, "model");
@@ -107,5 +107,5 @@ void RenderServer::render()
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, e_data.size() * sizeof(uint32_t), (void*)e_data.data(), GL_DYNAMIC_DRAW);
 
     glBindVertexArray(VAO);
-    glDrawElements(GL_TRIANGLES, e_data.size(), GL_UNSIGNED_INT, NULL);
+    glDrawElements(GL_TRIANGLES, (GLuint)e_data.size(), GL_UNSIGNED_INT, NULL);
 }

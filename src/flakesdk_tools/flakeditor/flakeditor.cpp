@@ -49,9 +49,7 @@ int main(void)
     Datatypes::MeshObject mesh2;
     Datatypes::MeshObject mesh3;
     Datatypes::Material material;
-    Datatypes::FreeCamera camera;
-
-
+    Datatypes::Camera camera;
 
     //Setup material
     mesh.material = material;
@@ -69,12 +67,15 @@ int main(void)
     renderServer.addToQueue(mesh3);
 
     //Sliders
-    float x = 0.0f;
     bool wir = 0;
 
-    while (!windowServer.shouldWindowClose(mainWindow)) {
-        mesh2.setPosition(mesh2.position.x + 0.001f, 0.0f, 0.0f);
+    camera.setPosition(0.0f, 0.0f, 1.0f); // Move camera 1 meter back.
+    camera.setFieldOfView(90.0f); // Set FOV.
+    camera.setFreeCamera(true); // False by default
+    camera.setFreeCameraSpeed(2.5f); // Set FreeCam speed
+    camera.setFreeCameraSensitivity(0.25f); // Set Sens
 
+    while (!windowServer.shouldWindowClose(mainWindow)) {
         inputServer.processInput(mainWindow.glfw_window);
 
         camera.update();
@@ -86,8 +87,13 @@ int main(void)
         uiServer.ui_begin();
 
         ImGui::Begin("Settings");
-        //ImGui::SliderFloat("xpos", &mesh2.position.x, -10.0f, 10.0f);
         ImGui::Checkbox("Wireframe", &wir);
+        ImGui::SeparatorText("Camera");
+        ImGui::DragFloat3("Position", &camera.position.x, 1.0f, -10.0f, 10.0f);
+        ImGui::Separator();
+        if (ImGui::Button("Quit")) {
+            forceQuitAction();
+        }
         ImGui::End();
 
         uiServer.ui_end();
