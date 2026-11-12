@@ -47,37 +47,32 @@ int main(void)
     //Create a mesh with a material
     Datatypes::MeshObject mesh;
     Datatypes::MeshObject mesh2;
-    Datatypes::MeshObject mesh3;
     Datatypes::Material material;
     Datatypes::Camera camera;
 
     //Setup material
     mesh.material = material;
     mesh2.material = material;
-    mesh3.material = material;
 
     //Setup mesh
-    mesh2.mesh.makeTriangle();
-    mesh.mesh.makeQuad();
-    mesh3.mesh.makeTriangle();
-    //Add mesh to render queue
-    
-    renderServer.addToQueue(mesh2);
-    renderServer.addToQueue(mesh);
-    renderServer.addToQueue(mesh3);
+    mesh.mesh.makeTriangle();
+    mesh2.mesh.makeCube();
 
     //Sliders
-    bool wir = 0;
+    bool wir = false;
+    float y = 1.0f;
 
     camera.setPosition(0.0f, 0.0f, 1.0f); // Move camera 1 meter back.
-    camera.setFieldOfView(90.0f); // Set FOV.
+    camera.setFieldOfView(75.0f); // Set FOV.
     camera.setFreeCamera(true); // False by default
     camera.setFreeCameraSpeed(2.5f); // Set FreeCam speed
     camera.setFreeCameraSensitivity(0.25f); // Set Sens
 
+    renderServer.addToQueue(mesh);
+    renderServer.addToQueue(mesh2);
+
     while (!windowServer.shouldWindowClose(mainWindow)) {
         inputServer.processInput(mainWindow.glfw_window);
-
         camera.update();
 
         renderServer.setCameraProjection(camera.getProjection());
@@ -88,12 +83,7 @@ int main(void)
 
         ImGui::Begin("Settings");
         ImGui::Checkbox("Wireframe", &wir);
-        ImGui::SeparatorText("Camera");
-        ImGui::DragFloat3("Position", &camera.position.x, 1.0f, -10.0f, 10.0f);
-        ImGui::Separator();
-        if (ImGui::Button("Quit")) {
-            forceQuitAction();
-        }
+        ImGui::SliderFloat("Scale", &y, -100.0f, 100.0f);
         ImGui::End();
 
         uiServer.ui_end();
@@ -101,6 +91,9 @@ int main(void)
 
         if (wir) { renderServer.setRenderMode(Flake::RenderMode::WIREFRAME); }
         else { renderServer.setRenderMode(Flake::RenderMode::NORMAL); }
+
+        mesh.setRotation(0.0f, 100.0f * glfwGetTime(), 0.0f);
+        mesh2.setScale(y, y, y);
     }
 
     uiServer.ui_destroy();

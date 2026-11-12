@@ -17,11 +17,13 @@ namespace Flake {
         void setRenderMode(RenderMode mode);
         void render();
         void clear();
-        void addToQueue(Datatypes::MeshObject object);
+        void addToQueue(Datatypes::MeshObject& object);
         void setCameraProjection(glm::mat4 projection);
         void setCameraTransform(glm::mat4 transform);
     private:
-        std::vector<Datatypes::MeshObject> m_render_queue;
+        const uint32_t MAX_MESH_OBJECTS = 64;
+
+        std::vector<Datatypes::MeshObject*> m_render_queue;
         GLuint VAO, VBO, EBO;
         
         std::vector<Datatypes::Vertex> v_data;
