@@ -58,8 +58,7 @@ void WindowServer::updateWindow(WindowObject& window)
 
     glfwGetFramebufferSize(window.glfw_window, &m_framebufferWidth, &m_framebufferHeight);
     glViewport(0, 0, m_framebufferWidth, m_framebufferHeight);
-
-    //glClear(GL_COLOR_BUFFER_BIT);
+    glClear(GL_COLOR_BUFFER_BIT);
 }
 void WindowServer::closeWindow(WindowObject& window)
 {

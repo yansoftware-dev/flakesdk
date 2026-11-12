@@ -8,7 +8,6 @@
 using namespace Flake;
 
 void RenderServer::initialize()
-
 {   // Enable depth_test.
     glEnable(GL_DEPTH_TEST);
 
@@ -75,7 +74,6 @@ void RenderServer::render()
     if (m_render_queue.empty()) { return; }
 
     std::vector<glm::mat4> model;
-    //model.clear();
     glm::mat4 view, projection;
 
     uint32_t total_prev_vert_count = 0;
