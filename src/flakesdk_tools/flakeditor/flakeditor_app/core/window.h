@@ -8,7 +8,7 @@ namespace Flakeditor
     class EditorWindow
     {
     public:
-        void create(std::string& name, uint32_t width, uint32_t height, bool maximized);
+        void create(std::string name, uint32_t width, uint32_t height, bool maximized);
         void update();
         void close();
         void setTitle(std::string& title);

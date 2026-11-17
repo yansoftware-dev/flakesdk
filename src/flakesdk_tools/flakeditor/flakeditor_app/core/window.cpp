@@ -6,7 +6,7 @@ inline Flake::WindowServer windowServer;
 
 using namespace Flakeditor;
 
-void EditorWindow::create(std::string& name, uint32_t width, uint32_t height, bool maximized)
+void EditorWindow::create(std::string name, uint32_t width, uint32_t height, bool maximized)
 {   
 
     Flake::WindowState state;

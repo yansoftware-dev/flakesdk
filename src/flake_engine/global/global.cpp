@@ -19,7 +19,7 @@ std::any GlobalServer::getVariable(std::string name) {
     }
     Flake::OutputServer output;
     output.printErr("Can't find global variable: " + name);
-    return nullptr;
+    //return 404;
 }
 
 void GlobalServer::removeVariable(std::string name) {
