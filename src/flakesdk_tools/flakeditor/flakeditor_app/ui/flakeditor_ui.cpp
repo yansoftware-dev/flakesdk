@@ -12,6 +12,7 @@
 
 inline Flake::UIServer uiServer;
 inline Flake::GlobalServer globalServer;
+inline Flake::OutputServer outputServer;
 
 using namespace Flakeditor;
 
@@ -37,6 +38,7 @@ void EUI::update()
     bool panelsInspector = std::any_cast<bool>(globalServer.getVariable("EDITOR_SHOW_INSPECTOR"));
 
     bool windowEditorSettings = std::any_cast<bool>(globalServer.getVariable("EDITOR_SHOW_SETTINGS"));
+    unsigned int editor_theme = std::any_cast<int>(globalServer.getVariable("EDITOR_COLOR_THEME"));
 
     if (panelsSceneTree)
        sceneTree.handleSceneTree();
@@ -47,6 +49,11 @@ void EUI::update()
 
     if (windowEditorSettings)
         editorSettings.handleEditorSettings();
+
+    if (editor_theme == 0) ImGui::StyleColorsDark();
+    else if (editor_theme == 1) ImGui::StyleColorsLight();
+    else if (editor_theme == 2) ImGui::StyleColorsClassic();
+    else outputServer.printErr("Unknown editor theme!");
 
     uiServer.ui_end();
 }   

@@ -13,6 +13,9 @@ bool panelsInspector = false;
 
 bool show = false;
 
+const char* themes[] = {"Dark", "Light", "Classic"};
+int selectedTheme = 0;
+
 void EUIEditorSettings::handleEditorSettings()
 {   
     panelsSceneTree = std::any_cast<bool>(globalServer.getVariable("EDITOR_SHOW_SCENE_TREE"));
@@ -22,10 +25,15 @@ void EUIEditorSettings::handleEditorSettings()
     show = std::any_cast<bool>(globalServer.getVariable("EDITOR_SHOW_SETTINGS"));
 
     ImGui::Begin("EditorSettings", &show, ImGuiWindowFlags_NoDocking);
+
     ImGui::SeparatorText("Editor-Panels");
     ImGui::Checkbox("Scene-Tree panel", &panelsSceneTree);
     ImGui::Checkbox("Asset-Viewer panel", &panelsAssetViewer);
     ImGui::Checkbox("Inspector panel", &panelsInspector);
+
+    ImGui::SeparatorText("Apperance");
+    ImGui::Combo("Theme", &selectedTheme, themes, IM_ARRAYSIZE(themes));
+
     ImGui::End();
 
     globalServer.setVariable("EDITOR_SHOW_SCENE_TREE", panelsSceneTree);
@@ -33,4 +41,5 @@ void EUIEditorSettings::handleEditorSettings()
     globalServer.setVariable("EDITOR_SHOW_INSPECTOR", panelsInspector);
 
     globalServer.setVariable("EDITOR_SHOW_SETTINGS", show);
+    globalServer.setVariable("EDITOR_COLOR_THEME", selectedTheme);
 }
