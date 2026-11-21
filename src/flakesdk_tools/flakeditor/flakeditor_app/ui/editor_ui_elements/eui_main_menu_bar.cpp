@@ -12,7 +12,7 @@ void EUIMainMenuBar::handleMainMenuBar()
     ImGui::BeginMainMenuBar();
     if (ImGui::BeginMenu("Flake")) {
         if (ImGui::MenuItem("Quit", "Alt + End")) {
-            //Quit
+            globalServer.setVariable("EDITOR_SHOULD_CLOSE", true);
         }
         ImGui::EndMenu();
     } 
@@ -40,9 +40,14 @@ void EUIMainMenuBar::handleMainMenuBar()
     } 
     if (ImGui::BeginMenu("Help")) {
         if (ImGui::MenuItem("About")) {
-
+            bool showAboutPage;
+            if (std::any_cast<bool>(globalServer.getVariable("EDITOR_SHOW_ABOUT"))) {
+                showAboutPage = false;
+            } else {
+                showAboutPage = true;
+            }
+            globalServer.setVariable("EDITOR_SHOW_ABOUT", showAboutPage);
         }
-
         ImGui::EndMenu();
     } 
     ImGui::EndMainMenuBar();

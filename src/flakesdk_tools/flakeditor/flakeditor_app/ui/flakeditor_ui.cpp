@@ -9,6 +9,7 @@
 #include "editor_ui_elements/eui_asset_viewer.h"
 
 #include "editor_ui_elements/eui_editor_settings.h"
+#include "editor_ui_elements/eui_editor_about.h"
 
 inline Flake::UIServer uiServer;
 inline Flake::GlobalServer globalServer;
@@ -22,6 +23,7 @@ EUIInspector inspector;
 EUIAssetViewer assetViewer;
 
 EUIEditorSettings editorSettings;
+EUIAboutPage aboutPage;
 
 void EUI::initialize()
 {
@@ -39,6 +41,7 @@ void EUI::update()
 
     bool windowEditorSettings = std::any_cast<bool>(globalServer.getVariable("EDITOR_SHOW_SETTINGS"));
     unsigned int editor_theme = std::any_cast<int>(globalServer.getVariable("EDITOR_COLOR_THEME"));
+    bool windowAbout = std::any_cast<bool>(globalServer.getVariable("EDITOR_SHOW_ABOUT"));
 
     if (panelsSceneTree)
        sceneTree.handleSceneTree();
@@ -49,6 +52,9 @@ void EUI::update()
 
     if (windowEditorSettings)
         editorSettings.handleEditorSettings();
+
+    if (windowAbout)
+        aboutPage.handleAboutPage();
 
     if (editor_theme == 0) ImGui::StyleColorsDark();
     else if (editor_theme == 1) ImGui::StyleColorsLight();
