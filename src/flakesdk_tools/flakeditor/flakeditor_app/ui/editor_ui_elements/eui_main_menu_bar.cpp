@@ -24,7 +24,19 @@ void EUIMainMenuBar::handleMainMenuBar()
         ImGui::EndMenu();
     } 
     if (ImGui::BeginMenu("View")) {
+
+        bool wireframeMode = std::any_cast<bool>(globalServer.getVariable("RENDERER_WIREFRAME_MODE"));
+        if (ImGui::Checkbox("Wireframe Mode", &wireframeMode)) {
+            if (std::any_cast<bool>(globalServer.getVariable("RENDERER_WIREFRAME_MODE"))) {
+                wireframeMode = false;
+            } else {
+                wireframeMode = true;
+            }
+            globalServer.setVariable("RENDERER_WIREFRAME_MODE", wireframeMode);
+        }
+
         ImGui::EndMenu();
+        
     } 
     if (ImGui::BeginMenu("Editor")) {
         if (ImGui::MenuItem("Editor Settings", "Ctrl + ,")) {
